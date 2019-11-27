@@ -64,12 +64,15 @@ def get_max_profit(candidates):
 #     return digit
 
 
-def output_information_to_excel(candidates_number, simulate_times, stop_position, accuracy):
+def output_information_to_excel(candidates_number, simulate_times, stop_position, accuracy, avg_profit, avg_best_profit, temp_accuracy):
     global current_row
     global t_candidates_number
     global t_simulate_times
     global t_stop_position
     global t_accuracy
+    global t_avg_profit
+    global t_avg_best_profit
+    global t_temp_accuracy
     print("=========output information to excel =======")
     print(f"candidate number = {candidates_number}, simulate time = {simulate_times}, stop position = {stop_position}, accuracy = {accuracy}")
 
@@ -77,6 +80,9 @@ def output_information_to_excel(candidates_number, simulate_times, stop_position
     excel.insert(column=t_simulate_times, row=current_row, information=f"{simulate_times}")
     excel.insert(column=t_stop_position, row=current_row, information=f"{stop_position}")
     excel.insert(column=t_accuracy, row=current_row, information=f"{accuracy}")
+    excel.insert(column=t_avg_profit, row=current_row, information=f"{avg_profit}")
+    excel.insert(column=t_avg_best_profit, row=current_row, information=f"{avg_best_profit}")
+    excel.insert(column=t_temp_accuracy, row=current_row, information=f"{temp_accuracy}")
     current_row += 1
     # print(f"num_candidates = {num_candidates}, target = {target} index of this target = {index_candidate}")
 
@@ -100,6 +106,9 @@ t_candidates_number = "A"
 t_simulate_times = "B"
 t_stop_position = "C"
 t_accuracy = "D"
+t_avg_profit = "E"
+t_avg_best_profit = "F"
+t_temp_accuracy = "G"
 
 # row
 current_row = 1
@@ -107,6 +116,9 @@ excel.insert(column=t_candidates_number, row=current_row, information="candidate
 excel.insert(column=t_simulate_times, row=current_row, information="simulate times")
 excel.insert(column=t_stop_position, row=current_row, information="stop position")
 excel.insert(column=t_accuracy, row=current_row, information="accuracy")
+excel.insert(column=t_avg_profit, row=current_row, information="avg profit")
+excel.insert(column=t_avg_best_profit, row=current_row, information="avg best profit")
+excel.insert(column=t_temp_accuracy, row=current_row, information="temp accuracy")
 current_row += 1
 
 
@@ -126,13 +138,19 @@ for num_candidates in candidates_pool:
         accuracy_stop_positions = [0 for i in range(len(stop_positions))]
         print(f"accuracy stop positions are {accuracy_stop_positions}")
         for i in range(len(stop_positions)):
+            avg_profit = 0.0
+            avg_best_profit = 0.0
+            temp_accuracy = 0.0
             accuracy = 0.0  # accuracy in this stop position
             for each_simulate in range(simulate_times):
                 np.random.shuffle(candidates)
                 max_profit = get_max_profit(candidates)
                 baseline = evaluate_benchmark(candidates, stop_positions[i], num_candidates)
                 current_profit = get_first_candidate_better_than_benchmark(candidates, stop_positions[i], num_candidates, baseline)
-
+                
+                avg_profit += current_profit
+                avg_best_profit += max_profit
+                temp_accuracy += float(current_profit)/float(max_profit)
                 if current_profit > max_profit * 0.98:
                     accuracy += 1
 
@@ -140,7 +158,10 @@ for num_candidates in candidates_pool:
                     print(f"stop position {stop_positions[i]} simulate process {int(each_simulate/1000)}/100. current accuracy {accuracy/each_simulate}")
                     # print(f"baseline {baseline} max_profit {max_profit} current profit {current_profit}")
             accuracy /= simulate_times
+            avg_profit /= simulate_times
+            avg_best_profit /= simulate_times
+            temp_accuracy /= simulate_times
             accuracy_stop_positions[i] = accuracy
-            output_information_to_excel(num_candidates, simulate_times, stop_positions[i], accuracy)
+            output_information_to_excel(num_candidates, simulate_times, stop_positions[i], accuracy, avg_profit, avg_best_profit, temp_accuracy)
         start_position, end_position = get_further_step_position(stop_positions, accuracy_stop_positions)
         excel.savefile()
