@@ -64,7 +64,7 @@ def get_max_profit(candidates):
 #     return digit
 
 
-def output_information_to_excel(candidates_number, simulate_times, stop_position, accuracy, avg_profit, avg_best_profit, temp_accuracy):
+def output_information_to_excel(candidates_number, simulate_times, stop_position, accuracy, avg_profit, avg_best_profit, actual_to_max_profit_ratio):
     global current_row
     global t_candidates_number
     global t_simulate_times
@@ -72,7 +72,7 @@ def output_information_to_excel(candidates_number, simulate_times, stop_position
     global t_accuracy
     global t_avg_profit
     global t_avg_best_profit
-    global t_temp_accuracy
+    global t_actual_to_max_profit_ratio
     print("=========output information to excel =======")
     print(f"candidate number = {candidates_number}, simulate time = {simulate_times}, stop position = {stop_position}, accuracy = {accuracy}")
 
@@ -82,7 +82,7 @@ def output_information_to_excel(candidates_number, simulate_times, stop_position
     excel.insert(column=t_accuracy, row=current_row, information=f"{accuracy}")
     excel.insert(column=t_avg_profit, row=current_row, information=f"{avg_profit}")
     excel.insert(column=t_avg_best_profit, row=current_row, information=f"{avg_best_profit}")
-    excel.insert(column=t_temp_accuracy, row=current_row, information=f"{temp_accuracy}")
+    excel.insert(column=t_actual_to_max_profit_ratio, row=current_row, information=f"{actual_to_max_profit_ratio}")
     current_row += 1
     # print(f"num_candidates = {num_candidates}, target = {target} index of this target = {index_candidate}")
 
@@ -108,7 +108,7 @@ t_stop_position = "C"
 t_accuracy = "D"
 t_avg_profit = "E"
 t_avg_best_profit = "F"
-t_temp_accuracy = "G"
+t_actual_to_max_profit_ratio = "G"
 
 # row
 current_row = 1
@@ -118,7 +118,7 @@ excel.insert(column=t_stop_position, row=current_row, information="stop position
 excel.insert(column=t_accuracy, row=current_row, information="accuracy")
 excel.insert(column=t_avg_profit, row=current_row, information="avg profit")
 excel.insert(column=t_avg_best_profit, row=current_row, information="avg best profit")
-excel.insert(column=t_temp_accuracy, row=current_row, information="temp accuracy")
+excel.insert(column=t_actual_to_max_profit_ratio, row=current_row, information="actual to max profit ratio")
 current_row += 1
 
 
@@ -140,7 +140,7 @@ for num_candidates in candidates_pool:
         for i in range(len(stop_positions)):
             avg_profit = 0.0
             avg_best_profit = 0.0
-            temp_accuracy = 0.0
+            actual_to_max_profit_ratio = 0.0
             accuracy = 0.0  # accuracy in this stop position
             for each_simulate in range(simulate_times):
                 np.random.shuffle(candidates)
@@ -150,7 +150,7 @@ for num_candidates in candidates_pool:
                 
                 avg_profit += current_profit
                 avg_best_profit += max_profit
-                temp_accuracy += float(current_profit)/float(max_profit)
+                actual_to_max_profit_ratio += float(current_profit)/float(max_profit)
                 if current_profit > max_profit * 0.98:
                     accuracy += 1
 
@@ -160,8 +160,8 @@ for num_candidates in candidates_pool:
             accuracy /= simulate_times
             avg_profit /= simulate_times
             avg_best_profit /= simulate_times
-            temp_accuracy /= simulate_times
+            actual_to_max_profit_ratio /= simulate_times
             accuracy_stop_positions[i] = accuracy
-            output_information_to_excel(num_candidates, simulate_times, stop_positions[i], accuracy, avg_profit, avg_best_profit, temp_accuracy)
+            output_information_to_excel(num_candidates, simulate_times, stop_positions[i], accuracy, avg_profit, avg_best_profit, actual_to_max_profit_ratio)
         start_position, end_position = get_further_step_position(stop_positions, accuracy_stop_positions)
         excel.savefile()
