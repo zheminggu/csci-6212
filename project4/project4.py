@@ -147,7 +147,7 @@ for num_candidates in candidates_pool:
                 max_profit = get_max_profit(candidates)
                 baseline = evaluate_benchmark(candidates, stop_positions[i], num_candidates)
                 current_profit = get_first_candidate_better_than_benchmark(candidates, stop_positions[i], num_candidates, baseline)
-                
+
                 avg_profit += current_profit
                 avg_best_profit += max_profit
                 temp_accuracy += float(current_profit)/float(max_profit)
